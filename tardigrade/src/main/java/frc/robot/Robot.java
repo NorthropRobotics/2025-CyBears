@@ -4,12 +4,18 @@
 
 package frc.robot;
 
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+
 import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -17,22 +23,43 @@ import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
  * this project, you must also update the manifest file in the resource directory.
  */
 public class Robot extends TimedRobot {
-  private final PWMSparkMax m_leftDrive = new PWMSparkMax(0);
-  private final PWMSparkMax m_rightDrive = new PWMSparkMax(1);
-  private final DifferentialDrive m_robotDrive =
-      new DifferentialDrive(m_leftDrive::set, m_rightDrive::set);
+  private final SparkMax m_leftDrive_leader = new SparkMax(1, MotorType.kBrushed);
+  private final SparkMax m_leftDrive_follower = new SparkMax(2,MotorType.kBrushed);
+  private final SparkMax m_rightDrive_leader = new SparkMax(3,MotorType.kBrushed);
+  private final SparkMax m_rightDrive_follower = new SparkMax(4,MotorType.kBrushed);
+  private final DifferentialDrive m_robotDrive;
   private final XboxController m_controller = new XboxController(0);
   private final Timer m_timer = new Timer();
-
+  private final SparkMaxConfig leaderConfig = new SparkMaxConfig();
+  private final SparkMaxConfig followerConfig = new SparkMaxConfig();
+  private final SparkMaxConfig commonConfig = new SparkMaxConfig();
   /** Called once at the beginning of the robot program. */
   public Robot() {
-    SendableRegistry.addChild(m_robotDrive, m_leftDrive);
-    SendableRegistry.addChild(m_robotDrive, m_rightDrive);
+    
+    leaderConfig.apply(commonConfig)
+      .idleMode(IdleMode.kBrake);
+    followerConfig.apply(commonConfig) 
+    .follow(1);
 
-    // We need to invert one side of the drivetrain so that positive voltages
+    m_rightDrive_leader.configure(leaderConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+    m_rightDrive_follower.configure(followerConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);// We need to invert one side of the drivetrain so that positive voltages
+      
+    leaderConfig.apply(commonConfig)
+    .inverted(true);
+
+    m_leftDrive_leader.configure(leaderConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+    m_leftDrive_follower.configure(followerConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+
+
+
+    
+    
+    m_robotDrive = new DifferentialDrive(m_leftDrive_leader::set, m_rightDrive_leader::set);
+
+    SendableRegistry.addChild(m_robotDrive, m_leftDrive_leader);
+    SendableRegistry.addChild(m_robotDrive, m_rightDrive_leader);
     // result in both sides moving forward. Depending on how your robot's
     // gearbox is constructed, you might have to invert the left side instead.
-    m_rightDrive.setInverted(true);
   }
 
   /** This function is run once each time the robot enters autonomous mode. */
