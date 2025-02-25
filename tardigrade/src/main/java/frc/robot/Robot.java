@@ -92,7 +92,7 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     m_robotDrive.arcadeDrive(-m_controller.getRawAxis(1), -m_controller.getRawAxis(4));
     if (m_controller.getRawButton(1)) {
-      m_scorer.set(1.0);
+      m_scorer.set(0.25);
   } else {
       m_scorer.set(0);
   }
