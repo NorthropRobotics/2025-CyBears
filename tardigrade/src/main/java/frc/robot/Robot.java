@@ -27,13 +27,14 @@ public class Robot extends TimedRobot {
   private final SparkMax m_leftDrive_follower = new SparkMax(2,MotorType.kBrushed);
   private final SparkMax m_rightDrive_leader = new SparkMax(3,MotorType.kBrushed);
   private final SparkMax m_rightDrive_follower = new SparkMax(4,MotorType.kBrushed);
+  private final SparkMax m_scorer = new SparkMax(5,MotorType.kBrushed);
   private final DifferentialDrive m_robotDrive;
   private final XboxController m_controller = new XboxController(0);
   private final Timer m_timer = new Timer();
   private final SparkMaxConfig RightleaderConfig = new SparkMaxConfig();
   private final SparkMaxConfig RightfollowerConfig = new SparkMaxConfig();
   private final SparkMaxConfig LeftleaderConfig = new SparkMaxConfig();
-  private final SparkMaxConfig LeftfollowerConfig = new SparkMaxConfig();
+  private final SparkMaxConfig LeftfollowerConfig = new SparkMaxConfig();  
   private final SparkMaxConfig commonConfig = new SparkMaxConfig();
   /** Called once at the beginning of the robot program. */
   public Robot() {
@@ -53,9 +54,8 @@ public class Robot extends TimedRobot {
     m_leftDrive_leader.configure(LeftleaderConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
     m_leftDrive_follower.configure(LeftfollowerConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
+    m_scorer.configure(commonConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
-
-    
     
     m_robotDrive = new DifferentialDrive(m_leftDrive_leader::set, m_rightDrive_leader::set);
 
@@ -91,7 +91,12 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     m_robotDrive.arcadeDrive(-m_controller.getRawAxis(1), -m_controller.getRawAxis(4));
+    if (m_controller.getRawButton(1)) {
+      m_scorer.set(1.0);
+  } else {
+      m_scorer.set(0);
   }
+  };
 
   /** This function is called once each time the robot enters test mode. */
   @Override
