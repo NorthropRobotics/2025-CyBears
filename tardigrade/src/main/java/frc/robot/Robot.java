@@ -30,25 +30,28 @@ public class Robot extends TimedRobot {
   private final DifferentialDrive m_robotDrive;
   private final XboxController m_controller = new XboxController(0);
   private final Timer m_timer = new Timer();
-  private final SparkMaxConfig leaderConfig = new SparkMaxConfig();
-  private final SparkMaxConfig followerConfig = new SparkMaxConfig();
+  private final SparkMaxConfig RightleaderConfig = new SparkMaxConfig();
+  private final SparkMaxConfig RightfollowerConfig = new SparkMaxConfig();
+  private final SparkMaxConfig LeftleaderConfig = new SparkMaxConfig();
+  private final SparkMaxConfig LeftfollowerConfig = new SparkMaxConfig();
   private final SparkMaxConfig commonConfig = new SparkMaxConfig();
   /** Called once at the beginning of the robot program. */
   public Robot() {
-    
-    leaderConfig.apply(commonConfig)
+    RightleaderConfig.apply(commonConfig)
+    .idleMode(IdleMode.kBrake)
+    .inverted(true);
+    RightfollowerConfig.apply(commonConfig)
+      .follow(3);
+    LeftleaderConfig.apply(commonConfig)
       .idleMode(IdleMode.kBrake);
-    followerConfig.apply(commonConfig) 
+    LeftfollowerConfig.apply(commonConfig) 
     .follow(1);
 
-    m_rightDrive_leader.configure(leaderConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
-    m_rightDrive_follower.configure(followerConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);// We need to invert one side of the drivetrain so that positive voltages
+    m_rightDrive_leader.configure(RightleaderConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+    m_rightDrive_follower.configure(RightfollowerConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);// We need to invert one side of the drivetrain so that positive voltages
       
-    leaderConfig.apply(commonConfig)
-    .inverted(true);
-
-    m_leftDrive_leader.configure(leaderConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
-    m_leftDrive_follower.configure(followerConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+    m_leftDrive_leader.configure(LeftleaderConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+    m_leftDrive_follower.configure(LeftfollowerConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
 
 
@@ -87,7 +90,7 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during teleoperated mode. */
   @Override
   public void teleopPeriodic() {
-    m_robotDrive.arcadeDrive(-m_controller.getLeftY(), -m_controller.getRightX());
+    m_robotDrive.arcadeDrive(-m_controller.getRawAxis(1), -m_controller.getRawAxis(4));
   }
 
   /** This function is called once each time the robot enters test mode. */
