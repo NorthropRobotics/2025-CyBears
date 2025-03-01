@@ -16,6 +16,8 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -36,8 +38,16 @@ public class Robot extends TimedRobot {
   private final SparkMaxConfig LeftleaderConfig = new SparkMaxConfig();
   private final SparkMaxConfig LeftfollowerConfig = new SparkMaxConfig();  
   private final SparkMaxConfig commonConfig = new SparkMaxConfig();
+  private static final String kDefaultAuto = "autonomousPeriodic";
+  private static final String kCustomAuto = "autonomousForward";
+  private String m_autoSelected;
+  private final SendableChooser<String> m_chooser = new SendableChooser<>();
   /** Called once at the beginning of the robot program. */
   public Robot() {
+
+    m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
+    m_chooser.addOption("My Auto", kCustomAuto);
+    SmartDashboard.putData("Auto choices", m_chooser);
     RightleaderConfig.apply(commonConfig)
     .idleMode(IdleMode.kBrake)
     .inverted(true);
@@ -68,19 +78,40 @@ public class Robot extends TimedRobot {
   /** This function is run once each time the robot enters autonomous mode. */
   @Override
   public void autonomousInit() {
+    m_autoSelected = m_chooser.getSelected();
+    System.out.println("Auto selected: " + m_autoSelected);
     m_timer.restart();
   }
 
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
+    switch (m_autoSelected) {
+      case kCustomAuto:
+      if (m_timer.get() < 2.0) {
+        // Drive forwards half speed, make sure to turn input squaring off
+        m_robotDrive.arcadeDrive(0.5, 0.0, false);
+      } else { if(m_timer.get() < 3.0) {
+         m_scorer.set(0.25);
+      } else {
+          m_scorer.set(0);
+          m_robotDrive.stopMotor();       
+      }
+      break;
+    
+      }
+      case kDefaultAuto:
+      default:
+      if (m_timer.get() < 2.0) {
+        // Drive forwards half speed, make sure to turn input squaring off
+        m_robotDrive.arcadeDrive(0.5, 0.0, false);
+      } else {
+        m_robotDrive.stopMotor(); // stop robot
+      }// Put default auto code here
+        break;
+      }
     // Drive for 2 seconds
-    if (m_timer.get() < 2.0) {
-      // Drive forwards half speed, make sure to turn input squaring off
-      m_robotDrive.arcadeDrive(0.5, 0.0, false);
-    } else {
-      m_robotDrive.stopMotor(); // stop robot
-    }
+
   }
 
   /** This function is called once each time the robot enters teleoperated mode. */
