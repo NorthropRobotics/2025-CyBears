@@ -91,7 +91,7 @@ public class Robot extends TimedRobot {
       if (m_timer.get() < 2.0) {
         // Drive forwards half speed, make sure to turn input squaring off
         m_robotDrive.arcadeDrive(0.5, 0.0, false);
-      } else { if(m_timer.get() < 3.0) {
+      } else { if(m_timer.get() < 5.0) {
          m_scorer.set(0.25);
       } else {
           m_scorer.set(0);
