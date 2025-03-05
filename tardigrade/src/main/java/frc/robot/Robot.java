@@ -121,7 +121,7 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during teleoperated mode. */
   @Override
   public void teleopPeriodic() {
-    m_robotDrive.arcadeDrive(-m_controller.getRawAxis(1), -m_controller.getRawAxis(4));
+    m_robotDrive.arcadeDrive(-m_controller.getRawAxis(1), m_controller.getRawAxis(4));
     if (m_controller.getRawButton(1)) {
       m_scorer.set(0.25);
   } else {
